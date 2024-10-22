@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Tvbox {
+  id     Int     @id @default(autoincrement())
+  url    String  @unique
+  status Boolean @default(false)
+  alis   Ali[]   @relation("TvboxAli")
+}
+
+model Ali {
+  id                  Int      @id @default(autoincrement())
+  url                 String
+  nickname            String   @default("")
+  refreshToken        String
+  refreshTokenTime    DateTime
+  openToken           String
+  openTokenTime       DateTime
+  openAccessToken     String
+  openAccessTokenTime DateTime
+  tvbox               Tvbox    @relation("TvboxAli", fields: [url], references: [url])
+
+  @@index([url], map: "Ali_url_fkey")
+}
