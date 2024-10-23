@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
+    "postinstall": "prisma generate",
     "lint": "next lint"
   },
   "dependencies": {
@@ -13,7 +14,7 @@
     "@prisma/client": "^5.21.1",
     "axios": "^1.7.7",
     "hono": "^4.6.5",
-    "next": "15.0.0",
+    "next": "^14.2.3",
     "react": "19.0.0-rc-65a56d0e-20241020",
     "react-dom": "19.0.0-rc-65a56d0e-20241020"
   },

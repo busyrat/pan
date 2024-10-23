@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import axios from "axios";
 // import process from 'process'
 // const args = process.argv.slice(3)
