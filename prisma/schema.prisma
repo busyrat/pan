@@ -10,7 +10,7 @@ datasource db {
 model Tvbox {
   id     Int     @id @default(autoincrement())
   url    String  @unique
-  status Boolean @default(false)
+  status String
   alis   Ali[]   @relation("TvboxAli")
 }
 
