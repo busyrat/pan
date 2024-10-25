@@ -11,20 +11,48 @@ model Tvbox {
   id     Int     @id @default(autoincrement())
   url    String  @unique
   status String
-  alis   Ali[]   @relation("TvboxAli")
+  alis   Ali[]
+  setting   Setting?
 }
 
 model Ali {
   id                  Int      @id @default(autoincrement())
-  url                 String
   nickname            String   @default("")
-  refreshToken        String
+  refreshToken        String   @unique
   refreshTokenTime    DateTime
-  openToken           String
+  openToken           String   @db.VarChar(512) @unique
   openTokenTime       DateTime
-  openAccessToken     String
+  openAccessToken     String   @db.VarChar(512)
   openAccessTokenTime DateTime
-  tvbox               Tvbox    @relation("TvboxAli", fields: [url], references: [url])
 
-  @@index([url], map: "Ali_url_fkey")
+  url           String @unique
+  tvbox               Tvbox    @relation(fields: [url], references: [url])
+}
+
+model Setting {
+  id                   Int      @id @default(autoincrement())
+  alist_restart_required String
+  app_version          String
+  alist_password       String
+  fix_site_id         String
+  ali_secret           String
+  alist_start_time     DateTime
+  alist_username       String
+  fix_sub_id          String
+  auto_index           String
+  docker_version       String
+  atv_password         String
+  token                String
+  index_version        String
+  fix_sid              String
+  auto_index_version    String
+  refresh_token_time   DateTime
+  movie_version        String
+  alist_login          String
+  fix_meta_id         String
+  open_token_url       String
+  fix_navigation       String
+
+  url           String @unique
+  tvbox               Tvbox   @relation(fields: [url], references: [url])
 }

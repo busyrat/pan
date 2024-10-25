@@ -2,6 +2,8 @@ import { Prisma, prisma } from '@/prisma';
 import { Hono } from 'hono'
 import { TvboxClient } from './TvboxClient';
 import axios from 'axios';
+import { Ali } from '@prisma/client';
+
 
 export const app = new Hono().basePath('/api')
 
@@ -33,20 +35,21 @@ app.post('/tvbox/add', async (c) => {
     if (r.status !== 200) {
       urlStatus = '-1'
     }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
+  } catch (error) {
+    console.log(error);
     urlStatus = '-1'
   }
 
+  let setting
   if (urlStatus === '1') {
     try {
       const tvbox = new TvboxClient(url)
-      const settings = await tvbox.getSettings()
-      if (!settings) {
+      setting = await tvbox.getSettings()
+      if (!setting) {
         urlStatus = '-2'
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.log(error);
       urlStatus = '-2'
     }
   }
@@ -55,7 +58,10 @@ app.post('/tvbox/add', async (c) => {
     await prisma.tvbox.create({
       data: {
         url,
-        status: urlStatus
+        status: urlStatus,
+        setting: {
+          create: setting
+        }
       }
     })
   } catch (e) {
@@ -82,4 +88,50 @@ app.post('/tvbox/add', async (c) => {
       '-2': '密码不为默认',
     }[urlStatus],
   })
+})
+
+app.post('/tvbox/add/ali', async (c) => {
+  const { url } = await c.req.json()
+  const tvbox = new TvboxClient(url)
+
+  const accounts = await tvbox.getAliAccounts()
+  
+  if (!accounts) {
+    return c.json({
+      status: false,
+      message: '获取失败'
+    })
+  }
+
+  try {    
+    await prisma.ali.createMany({
+      data: accounts.map((row: Ali) => {
+        const { nickname, refreshToken, refreshTokenTime, openToken, openTokenTime, openAccessToken, openAccessTokenTime } = row
+        return { url, nickname, refreshToken, refreshTokenTime, openToken, openTokenTime, openAccessToken, openAccessTokenTime }
+      })
+    })
+  } catch (error) {
+    console.log(error, accounts);
+    return c.json({
+      status: false,
+      message: '保存失败'
+    })
+  }
+
+  return c.json(accounts)
+})
+
+app.get('/tvbox', async (c) => {
+  const { url } = c.req.query()
+
+  const data = await prisma.tvbox.findUnique({
+    where: {
+      url
+    },
+    include: {
+      alis: true
+    }
+  })
+
+  return c.json(data)
 })
